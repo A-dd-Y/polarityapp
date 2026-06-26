@@ -116,5 +116,21 @@
             },
             "versions": "EQ(*)"
         }
-    ]
+    ],
+    "pip39_dependencies": {
+        "wheel": [
+            {
+                "module": "typing_extensions",
+                "input_file": "wheels/py3/typing_extensions-4.15.0-py3-none-any.whl"
+            }
+        ]
+    },
+    "pip313_dependencies": {
+        "wheel": [
+            {
+                "module": "typing_extensions",
+                "input_file": "wheels/py3/typing_extensions-4.15.0-py3-none-any.whl"
+            }
+        ]
+    }
 }

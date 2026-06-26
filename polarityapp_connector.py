@@ -26,6 +26,7 @@ from bs4 import BeautifulSoup
 from phantom.action_result import ActionResult
 from phantom.base_connector import BaseConnector
 
+
 # from polarityapp_consts import *
 
 

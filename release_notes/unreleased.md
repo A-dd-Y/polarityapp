@@ -1,1 +1,5 @@
 **Unreleased**
+
+* Initial release of PolarityApp connector
+* Added test connectivity action
+* Added search action with entity parsing and per-integration lookup
