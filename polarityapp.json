@@ -10,7 +10,7 @@
     "python_version": "3.13",
     "product_version_regex": ".*",
     "publisher": "Splunk",
-    "license": "Copyright (c) Splunk, 2025",
+    "license": "Copyright (c) Splunk, 2025-2026",
     "app_version": "1.2.0",
     "utctime_updated": "2025-10-21T13:03:54.211677Z",
     "package_name": "phantom_polarityapp",

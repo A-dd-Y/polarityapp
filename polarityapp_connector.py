@@ -1,18 +1,30 @@
+# Copyright (c) 2026 Splunk Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
 # -----------------------------------------
 # Phantom sample App Connector python file
 # -----------------------------------------
 
 # Phantom App imports
-import phantom.app as phantom
-from phantom.action_result import ActionResult
-from phantom.base_connector import BaseConnector
-
 import json
+from collections import defaultdict
+
+import phantom.app as phantom
 import requests
 from bs4 import BeautifulSoup
-from collections import defaultdict
+from phantom.action_result import ActionResult
+from phantom.base_connector import BaseConnector
 
 # from polarityapp_consts import *
 
@@ -24,7 +36,7 @@ class RetVal(tuple):
 
 class PolarityappConnector(BaseConnector):
     def __init__(self):
-        super(PolarityappConnector, self).__init__()
+        super().__init__()
         self._state = None
         self._base_url = None
 
@@ -33,9 +45,7 @@ class PolarityappConnector(BaseConnector):
             return RetVal(phantom.APP_SUCCESS, {})
 
         return RetVal(
-            action_result.set_status(
-                phantom.APP_ERROR, "Empty response and no information in the header"
-            ),
+            action_result.set_status(phantom.APP_ERROR, "Empty response and no information in the header"),
             None,
         )
 
@@ -51,9 +61,7 @@ class PolarityappConnector(BaseConnector):
         except Exception:
             error_text = "Cannot parse error details"
 
-        message = "Status Code: {0}. Data from server:\n{1}\n".format(
-            status_code, error_text
-        )
+        message = f"Status Code: {status_code}. Data from server:\n{error_text}\n"
 
         message = message.replace("{", "{{").replace("}", "}}")
         return RetVal(action_result.set_status(phantom.APP_ERROR, message), None)
@@ -65,7 +73,7 @@ class PolarityappConnector(BaseConnector):
             return RetVal(
                 action_result.set_status(
                     phantom.APP_ERROR,
-                    "Unable to parse JSON response. Error: {0}".format(str(e)),
+                    f"Unable to parse JSON response. Error: {e!s}",
                 ),
                 None,
             )
@@ -73,9 +81,7 @@ class PolarityappConnector(BaseConnector):
         if 200 <= r.status_code < 399:
             return RetVal(phantom.APP_SUCCESS, resp_json)
 
-        message = "Error from server. Status Code: {0} Data from server: {1}".format(
-            r.status_code, r.text.replace("{", "{{").replace("}", "}}")
-        )
+        message = "Error from server. Status Code: {} Data from server: {}".format(r.status_code, r.text.replace("{", "{{").replace("}", "}}"))
 
         return RetVal(action_result.set_status(phantom.APP_ERROR, message), None)
 
@@ -94,7 +100,7 @@ class PolarityappConnector(BaseConnector):
         if not r.text:
             return self._process_empty_response(r, action_result)
 
-        message = "Can't process response from server. Status Code: {0} Data from server: {1}".format(
+        message = "Can't process response from server. Status Code: {} Data from server: {}".format(
             r.status_code, r.text.replace("{", "{{").replace("}", "}}")
         )
 
@@ -109,9 +115,7 @@ class PolarityappConnector(BaseConnector):
             request_func = getattr(requests, method)
         except AttributeError:
             return RetVal(
-                action_result.set_status(
-                    phantom.APP_ERROR, "Invalid method: {0}".format(method)
-                ),
+                action_result.set_status(phantom.APP_ERROR, f"Invalid method: {method}"),
                 resp_json,
             )
 
@@ -127,7 +131,7 @@ class PolarityappConnector(BaseConnector):
             return RetVal(
                 action_result.set_status(
                     phantom.APP_ERROR,
-                    "Error Connecting to server. Details: {0}".format(str(e)),
+                    f"Error Connecting to server. Details: {e!s}",
                 ),
                 resp_json,
             )
@@ -138,7 +142,7 @@ class PolarityappConnector(BaseConnector):
         if isinstance(data, dict):
             new_dict = {}
             for k, v in data.items():
-                cleaned_v = self._clean_json_recursively(v)  # Use self.
+                cleaned_v = self._clean_json_recursively(v)
                 if cleaned_v not in (None, "", [], {}):
                     new_dict[k] = cleaned_v
             return new_dict
@@ -146,7 +150,7 @@ class PolarityappConnector(BaseConnector):
         elif isinstance(data, list):
             new_list = []
             for item in data:
-                cleaned_item = self._clean_json_recursively(item)  # Use self.
+                cleaned_item = self._clean_json_recursively(item)
                 if cleaned_item not in (None, "", [], {}):
                     new_list.append(cleaned_item)
             return new_list
@@ -164,22 +168,18 @@ class PolarityappConnector(BaseConnector):
             "Accept": "application/vnd.api+json",
             "Content-Type": "application/vnd.api+json",
         }
-        ret_val, response = self._make_rest_call(
-            "/api/api-keys/me", action_result, params=None, headers=headers
-        )
+        ret_val, response = self._make_rest_call("/api/api-keys/me", action_result, params=None, headers=headers)
 
         if phantom.is_fail(ret_val):
             self.save_progress("Test Connectivity Failed.")
             return action_result.get_status()
 
         self.save_progress("Test Connectivity Passed")
-        self.save_progress("\n+++++\n{0}".format(response))
+        self.save_progress(f"\n+++++\n{response}")
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _handle_search(self, param):
-        self.save_progress(
-            "In action handler for: {0}".format(self.get_action_identifier())
-        )
+        self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
         action_result = self.add_action_result(ActionResult(dict(param)))
 
@@ -190,12 +190,9 @@ class PolarityappConnector(BaseConnector):
             "Accept": "application/vnd.api+json",
             "Content-Type": "application/vnd.api+json",
         }
-        ret_val, response = self._make_rest_call(
-            "/api/integrations", action_result, params=None, headers=headers
-        )
+        ret_val, response = self._make_rest_call("/api/integrations", action_result, params=None, headers=headers)
         if phantom.is_fail(ret_val):
             return action_result.get_status()
-            # pass
 
         ids = list(
             {
@@ -206,9 +203,7 @@ class PolarityappConnector(BaseConnector):
             }
         )
 
-        parse_payload = {
-            "data": {"type": "parsed-entities", "attributes": {"text": text}}
-        }
+        parse_payload = {"data": {"type": "parsed-entities", "attributes": {"text": text}}}
         ret_val, response = self._make_rest_call(
             "/api/parsed-entities",
             action_result,
@@ -220,19 +215,13 @@ class PolarityappConnector(BaseConnector):
             return action_result.get_status()
 
         etype = defaultdict(list)
-        for e in (
-            response.get("data", {}).get("attributes", {}).get("entities", []) or []
-        ):
+        for e in response.get("data", {}).get("attributes", {}).get("entities", []) or []:
             t, v = e.get("type"), e.get("value")
             if t and v:
                 etype[t].append(v)
         etype = dict(etype)
 
-        entities = [
-            {"value": v, "type": t, "channels": []}
-            for t, vals in (etype or {}).items()
-            for v in vals
-        ]
+        entities = [{"value": v, "type": t, "channels": []} for t, vals in (etype or {}).items() for v in vals]
         lookup_payload = {
             "data": {
                 "type": "integration-lookups",
@@ -242,24 +231,17 @@ class PolarityappConnector(BaseConnector):
 
         for iid in ids:
             path = f"/api/integrations/{iid}/lookup"
-            ret_val, response = self._make_rest_call(
-                path, action_result, method="post", json=lookup_payload, headers=headers
-            )
+            ret_val, response = self._make_rest_call(path, action_result, method="post", json=lookup_payload, headers=headers)
             if phantom.is_fail(ret_val):
-                self.save_progress(
-                    f"[ERROR] Lookup for integration {iid} failed. Skipping."
-                )
+                self.save_progress(f"[ERROR] Lookup for integration {iid} failed. Skipping.")
                 continue
-            bad_json = "errors" in response or not response.get("data", {}).get(
-                "attributes", {}
-            ).get("results")
+            bad_json = "errors" in response or not response.get("data", {}).get("attributes", {}).get("results")
             if not bad_json:
                 good_json = self._clean_json_recursively(response)
                 if good_json:
                     result_object = {"integration_id": iid, "result_data": good_json}
                     action_result.add_data(result_object)
-                    self.save_progress("{0}".format(result_object))
-        # action_result.add_data(polarityRes)
+                    self.save_progress(f"{result_object}")
 
         summary = action_result.update_summary({})
         summary["IIDs"] = len(action_result.get_data())
